@@ -27,18 +27,24 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUser = (req, res) => {
-  const { id } = req.params;
-  User.findById(id)
+  const { userId } = req.params;
+  User.findById(userId)
     .then((user) => {
       if (!user) {
         res.status(NOT_FOUND_CODE).send({
-          message: `Пользователь по указанному _id (${id}) не найден`,
+          message: `Пользователь по указанному _id (${userId}) не найден`,
         });
         return;
       }
-      res.status(200).send(user);
+      res.send(user);
     })
     .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        res.status(ERROR_CODE).send({
+          message: 'Невалидные данные',
+        });
+        return;
+      }
       res
         .status(SERVER_ERROR_CODE)
         .send({ message: `На сервере произошла ошибка: ${err.name}` });
@@ -66,7 +72,7 @@ module.exports.createUser = (req, res) => {
 module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { name, about })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -90,7 +96,7 @@ module.exports.updateUser = (req, res) => {
 module.exports.updateAvatar = (req, res) => {
   const { avatar } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, { avatar })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true })
     .then((user) => res.send({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {

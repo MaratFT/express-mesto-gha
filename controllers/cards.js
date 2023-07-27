@@ -32,12 +32,12 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
+  Card.findByIdAndRemove(req.params.cardId)
     .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (!req.params._id) {
+      if (!req.params.cardId) {
         res.status(NOT_FOUND_CODE).send({
-          message: `Карточка с указанным _id (${req.params.id}) не найдена`,
+          message: `Карточка с указанным _id (${req.params.cardId}) не найдена`,
         });
         return;
       }
@@ -49,7 +49,7 @@ module.exports.deleteCard = (req, res) => {
 
 module.exports.putCardLike = (req, res) => {
   Card.findByIdAndUpdate(
-    req.params.id,
+    req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
@@ -63,7 +63,7 @@ module.exports.putCardLike = (req, res) => {
       }
       if (!req.user._id) {
         res.status(NOT_FOUND_CODE).send({
-          message: `Передан несуществующий _id (${req.params.id}) карточки`,
+          message: `Передан несуществующий _id (${req.params.cardId}) карточки`,
         });
         return;
       }
@@ -75,7 +75,7 @@ module.exports.putCardLike = (req, res) => {
 
 module.exports.deleteCardLike = (req, res) => {
   Card.findByIdAndUpdate(
-    req.params.id,
+    req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
@@ -89,7 +89,7 @@ module.exports.deleteCardLike = (req, res) => {
       }
       if (!req.user._id) {
         res.status(NOT_FOUND_CODE).send({
-          message: `Передан несуществующий _id (${req.params.id}) карточки`,
+          message: `Передан несуществующий _id (${req.params.cardId}) карточки`,
         });
         return;
       }
