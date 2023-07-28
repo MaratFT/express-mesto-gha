@@ -8,6 +8,8 @@ const routesCards = require('./routes/cards');
 
 const { PORT = 3000 } = process.env;
 
+const NOT_FOUND_CODE = 404;
+
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useNewUrlParser: true,
   useCreateIndex: true,
@@ -34,6 +36,12 @@ app.use('/', routesUsers);
 // });
 
 app.use('/', routesCards);
+
+app.get('*', (req, res) => {
+  res.status(NOT_FOUND_CODE).send({
+    message: 'Несуществующий адрес сайта',
+  });
+});
 
 app.listen(PORT, () => {
   console.log(`Приложение запущено на порту ${PORT}`);

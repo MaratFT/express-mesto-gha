@@ -53,17 +53,19 @@ module.exports.putCardLike = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .then((card) => res.send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE).send({
-          message: 'Переданы некорректные данные для постановки лайка',
+    .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND_CODE).send({
+          message: `Передан несуществующий _id (${req.params.cardId}) карточки`,
         });
         return;
       }
-      if (!req.user._id) {
-        res.status(NOT_FOUND_CODE).send({
-          message: `Передан несуществующий _id (${req.params.cardId}) карточки`,
+      res.send({ data: card });
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        res.status(ERROR_CODE).send({
+          message: 'Переданы некорректные данные для постановки лайка',
         });
         return;
       }
@@ -79,17 +81,19 @@ module.exports.deleteCardLike = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .then((card) => res.send({ data: card }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERROR_CODE).send({
-          message: 'Переданы некорректные данные для снятия лайка',
+    .then((card) => {
+      if (!card) {
+        res.status(NOT_FOUND_CODE).send({
+          message: `Передан несуществующий _id (${req.params.cardId}) карточки`,
         });
         return;
       }
-      if (!req.user._id) {
-        res.status(NOT_FOUND_CODE).send({
-          message: `Передан несуществующий _id (${req.params.cardId}) карточки`,
+      res.send({ data: card });
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        res.status(ERROR_CODE).send({
+          message: 'Переданы некорректные данные для снятия лайка',
         });
         return;
       }
