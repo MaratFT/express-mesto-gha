@@ -37,7 +37,7 @@ app.use('/', routesUsers);
 
 app.use('/', routesCards);
 
-app.get('*', (req, res) => {
+app.patch('*', (req, res) => {
   res.status(NOT_FOUND_CODE).send({
     message: 'Несуществующий адрес сайта',
   });
