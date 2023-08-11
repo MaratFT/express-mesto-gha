@@ -3,16 +3,17 @@ const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 
 const helmet = require('helmet');
+const { errors } = require('celebrate');
 const routesUsers = require('./routes/users');
 const routesCards = require('./routes/cards');
 
 const auth = require('./middlewares/auth');
 
-// const BadRequestError = require("./errors/bad-request-error");
-// const ExistsDatabaseError = require("./errors/exists-database-error");
-// const NotFoundError = require("./errors/not-found-err");
-// const ServerError = require("./errors/server-error");
-// const UnauthorizedError = require("./errors/unauthorized-error");
+// const BadRequestError = require('./errors/bad-request-error');
+// const ExistsDatabaseError = require('./errors/exists-database-error');
+// const NotFoundError = require('./errors/not-found-err');
+// const ServerError = require('./errors/server-error');
+// const UnauthorizedError = require('./errors/unauthorized-error');
 
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 
@@ -43,12 +44,20 @@ app.patch('*', (req, res) => {
 
 app.use('/', auth, routesCards);
 
+app.use(errors());
+
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
   // if (err) {
   //   res.status(401).send({ message: "Необходима авторизация" });
   //   return;
+  // }
+
+  // if (err.code === 401) {
+  //   res.status(401).send({
+  //     message: "Неправильные почта или пароль",
+  //   });
   // }
 
   if (err.kind === 'ObjectId') {
@@ -63,12 +72,20 @@ app.use((err, req, res, next) => {
     });
     return;
   }
-  if (err.code === 11000) {
-    res.status(409).send({
-      message: 'Уже существует такой пользователь',
-    });
-    return;
-  }
+  // if (err.code === 11000) {
+  //   res.status(409).send({
+  //     message: "Уже существует такой пользователь",
+  //   });
+  //   return;
+  //   // ExistsDatabaseError("Уже существует такой пользователь");
+  // }
+  // if (err.code === 11000) {
+  //   res.status(409).send({
+  //     message: "Уже существует такой пользователь",
+  //   });
+  //   return;
+  // }
+
   res.status(statusCode).send({
     message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
   });

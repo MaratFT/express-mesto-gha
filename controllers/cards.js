@@ -29,19 +29,19 @@ module.exports.createCard = (req, res, next) => {
 };
 
 module.exports.deleteCard = (req, res, next) => {
-  Card.findByIdAndRemove(req.params.cardId)
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
         throw new NotFoundError(
           `Карточка с указанным _id (${req.params.cardId}) не найдена`,
         );
       }
-      if (card.owner === req.user._id) {
+      if (card.owner !== req.user._id) {
         throw new BadRequestError(
-          `Карточка другого пользователя ${card.owner}`,
+          `Карточка другого пользователя (${card.owner})`,
         );
       }
-      res.send({ data: card });
+      Card.findByIdAndRemove(req.params.cardId).then((cardDelete) => res.send(cardDelete));
     })
     .catch(next);
 };

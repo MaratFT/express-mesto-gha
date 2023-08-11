@@ -11,11 +11,11 @@ const CREATED_CODE = 201;
 
 const NotFoundError = require('../errors/not-found-err');
 
-// const BadRequestError = require('../errors/bad-request-error');
+// // const BadRequestError = require('../errors/bad-request-error');
 // const ExistsDatabaseError = require('../errors/exists-database-error');
 
-// const ServerError = require('../errors/server-error');
-// const UnauthorizedError = require('../errors/unauthorized-error');
+// // const ServerError = require('../errors/server-error');
+const UnauthorizedError = require('../errors/unauthorized-error');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -51,9 +51,21 @@ module.exports.createUser = (req, res, next) => {
         avatar,
         email,
         password: hash,
-      }).then((user) => res.status(CREATED_CODE).send({ data: user }));
+      })
+        .then((user) => res.status(CREATED_CODE).send({ data: user }))
+        .catch((error) => {
+          if (error.code === 11000) {
+            res
+              .status(409)
+              .send({ message: 'Уже существует такой пользователь' });
+          } else {
+            next(error);
+          }
+        });
     })
-    .catch(next);
+    .catch((err) => {
+      next(err);
+    });
 };
 
 module.exports.updateUser = (req, res, next) => {
@@ -99,6 +111,9 @@ module.exports.login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
+      if (!user) {
+        throw new UnauthorizedError('Неправильные почта или пароль');
+      }
       const token = jwt.sign(
         { _id: user._id },
         '6abdf5e2d4054227bc988ee37bad3c4f8c4ee34e83dfeda9b6b228888605fa90',

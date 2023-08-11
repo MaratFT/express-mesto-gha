@@ -3,6 +3,8 @@ const bcrypt = require('bcryptjs');
 
 const validator = require('validator');
 
+// const regex = /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/;
+
 const userSchema = new mongoose.Schema(
   {
     email: {
@@ -36,10 +38,12 @@ const userSchema = new mongoose.Schema(
       type: String,
       default:
         'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
-      validate: {
-        validator: (v) => validator.isURL(v),
-        message: 'Некорректный URL',
-      },
+      //   validate: {
+      //     validator: (v) => {
+      //       validator.isURL(v);
+      //     },
+      //   },
+      //   message: "Некорректный URL",
     },
   },
   { versionKey: false },
@@ -57,7 +61,6 @@ userSchema.statics.findUserByCredentials = function (email, password) {
         if (!matched) {
           return Promise.reject(new Error('Неправильные почта или пароль'));
         }
-        console.log(user);
         return user;
       });
     });
