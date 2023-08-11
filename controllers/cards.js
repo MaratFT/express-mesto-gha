@@ -6,11 +6,12 @@ const Card = require('../models/card');
 
 const CREATED_CODE = 201;
 
-const BadRequestError = require('../errors/bad-request-error');
+// const BadRequestError = require("../errors/bad-request-error");
 // const ExistsDatabaseError = require('../errors/exists-database-error');
 const NotFoundError = require('../errors/not-found-err');
 // const ServerError = require('../errors/server-error');
 // const UnauthorizedError = require('../errors/unauthorized-error');
+const ForbiddenError = require('../errors/forbidden-error');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -36,12 +37,12 @@ module.exports.deleteCard = (req, res, next) => {
           `Карточка с указанным _id (${req.params.cardId}) не найдена`,
         );
       }
-      if (card.owner !== req.user._id) {
-        throw new BadRequestError(
+      if (req.user._id != card.owner) {
+        throw new ForbiddenError(
           `Карточка другого пользователя (${card.owner})`,
         );
       }
-      Card.findByIdAndRemove(req.params.cardId).then((cardDelete) => res.send(cardDelete));
+      Card.findByIdAndRemove(card).then((cardDelete) => res.send(cardDelete));
     })
     .catch(next);
 };
@@ -53,7 +54,7 @@ module.exports.putCardLike = (req, res, next) => {
     { new: true },
   )
     .then((card) => {
-      if (!req.params.cardId) {
+      if (!card) {
         throw new NotFoundError(
           `Передан несуществующий _id (${req.params.cardId}) карточки`,
         );
@@ -70,7 +71,7 @@ module.exports.deleteCardLike = (req, res, next) => {
     { new: true },
   )
     .then((card) => {
-      if (!req.params.cardId) {
+      if (!card) {
         throw new NotFoundError(
           `Передан несуществующий _id (${req.params.cardId}) карточки`,
         );

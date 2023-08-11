@@ -25,7 +25,16 @@ router.get(
 
 router.get('/users/me', auth, getUserCurrent);
 
-router.get('/users/:userId', auth, getUser);
+router.get(
+  '/users/:userId',
+  celebrate({
+    params: Joi.object().keys({
+      userId: Joi.string().length(24).hex().required(),
+    }),
+  }),
+  auth,
+  getUser,
+);
 
 router.patch(
   '/users/me',
