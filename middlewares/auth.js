@@ -23,7 +23,7 @@ module.exports = (req, res, next) => {
   }
 
   req.user = payload; // записываем пейлоуд в объект запроса
-
+  // res.append("Authorization", `Bearer ${token}`);
   next(); // пропускаем запрос дальше
 };
 

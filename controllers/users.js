@@ -17,9 +17,15 @@ const NotFoundError = require('../errors/not-found-err');
 // // const ServerError = require('../errors/server-error');
 const UnauthorizedError = require('../errors/unauthorized-error');
 
+// module.exports.getToken = (req, res) => {
+//   const { token } = req;
+//   return token;
+// };
+
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
+
     .catch(next);
 };
 
@@ -52,7 +58,13 @@ module.exports.createUser = (req, res, next) => {
         email,
         password: hash,
       })
-        .then((user) => res.status(CREATED_CODE).send({ data: user }))
+        .then((user) => res.status(CREATED_CODE).send({
+          name: user.name,
+          about: user.about,
+          avatar: user.avatar,
+          email: user.email,
+          _id: user._id,
+        }))
         .catch((error) => {
           if (error.code === 11000) {
             res
@@ -111,9 +123,6 @@ module.exports.login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      if (!user) {
-        throw new UnauthorizedError('Неправильные почта или пароль');
-      }
       const token = jwt.sign(
         { _id: user._id },
         '6abdf5e2d4054227bc988ee37bad3c4f8c4ee34e83dfeda9b6b228888605fa90',
@@ -123,6 +132,12 @@ module.exports.login = (req, res, next) => {
       );
 
       res.send({ token });
+    })
+    .catch((err) => {
+      if (err) {
+        throw new UnauthorizedError('Неправильные почта или пароль');
+      }
+      next(err);
     })
     .catch(next);
 };

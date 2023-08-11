@@ -13,9 +13,15 @@ const {
   updateAvatar,
   login,
   getUserCurrent,
+  // getToken,
 } = require('../controllers/users');
 
-router.get('/users', auth, getUsers);
+router.get(
+  '/users',
+  auth,
+  // (req, res) => res.append("Authorization", `Bearer ${getToken}`),
+  getUsers,
+);
 
 router.get('/users/me', auth, getUserCurrent);
 
@@ -61,6 +67,9 @@ router.post(
     body: Joi.object().keys({
       email: Joi.string().required().email(),
       password: Joi.string().required().min(8),
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string().pattern(new RegExp(regex)),
     }),
   }),
   createUser,
