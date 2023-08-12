@@ -39,8 +39,7 @@ module.exports.deleteCard = (req, res, next) => {
         next(
           new ForbiddenError(`Карточка другого пользователя (${card.owner})`),
         );
-      }
-      if (String(req.user._id) === String(card.owner)) {
+      } else if (String(req.user._id) === String(card.owner)) {
         Card.deleteOne(card).then((cardDelete) => res.send(cardDelete));
       }
     })
