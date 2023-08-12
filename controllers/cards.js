@@ -33,22 +33,27 @@ module.exports.createCard = (req, res, next) => {
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
+    .orFail(new Error('NotFoundCard'))
     .then((card) => {
-      if (!card) {
-        throw new NotFoundError(
-          `Карточка с указанным _id (${req.params.cardId}) не найдена`,
+      if (String(req.user._id) !== String(card.owner)) {
+        next(
+          new ForbiddenError(`Карточка другого пользователя (${card.owner})`),
         );
       }
-      if (req.user._id != card.owner) {
-        throw new ForbiddenError(
-          `Карточка другого пользователя (${card.owner})`,
-        );
+      if (String(req.user._id) === String(card.owner)) {
+        Card.deleteOne(card).then((cardDelete) => res.send(cardDelete));
       }
-      Card.deleteOne(card).then((cardDelete) => res.send(cardDelete));
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
         next(new BadRequestError('Некорректный запрос карточки'));
+      }
+      if (err.message === 'NotFoundCard') {
+        next(
+          new NotFoundError(
+            `Карточка с указанным _id (${req.params.cardId}) не найдена`,
+          ),
+        );
       }
     })
     .catch(next);
@@ -60,12 +65,8 @@ module.exports.putCardLike = (req, res, next) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
+    .orFail(new Error('NotFoundCard'))
     .then((card) => {
-      if (!card) {
-        throw new NotFoundError(
-          `Передан несуществующий _id (${req.params.cardId}) карточки`,
-        );
-      }
       res.send({ data: card });
     })
     .catch((err) => {
@@ -73,6 +74,13 @@ module.exports.putCardLike = (req, res, next) => {
         next(
           new BadRequestError(
             'Переданы некорректные данные для постановки лайка',
+          ),
+        );
+      }
+      if (err.message === 'NotFoundCard') {
+        next(
+          new NotFoundError(
+            `Передан несуществующий _id (${req.params.cardId}) карточки`,
           ),
         );
       }
@@ -86,18 +94,21 @@ module.exports.deleteCardLike = (req, res, next) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
+    .orFail(new Error('NotFoundCard'))
     .then((card) => {
-      if (!card) {
-        throw new NotFoundError(
-          `Передан несуществующий _id (${req.params.cardId}) карточки`,
-        );
-      }
       res.send({ data: card });
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
         next(
           new BadRequestError('Переданы некорректные данные для снятия лайка'),
+        );
+      }
+      if (err.message === 'NotFoundCard') {
+        next(
+          new NotFoundError(
+            `Передан несуществующий _id (${req.params.cardId}) карточки`,
+          ),
         );
       }
     })
