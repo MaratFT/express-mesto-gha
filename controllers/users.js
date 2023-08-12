@@ -34,8 +34,8 @@ module.exports.getUser = (req, res, next) => {
       if (err.kind === 'ObjectId') {
         next(new BadRequestError('Некорректный запрос пользователя'));
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 module.exports.createUser = async (req, res, next) => {
@@ -93,8 +93,8 @@ module.exports.updateUser = (req, res, next) => {
           ),
         );
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 module.exports.updateAvatar = (req, res, next) => {
@@ -121,8 +121,8 @@ module.exports.updateAvatar = (req, res, next) => {
           ),
         );
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 module.exports.login = (req, res, next) => {
@@ -142,11 +142,11 @@ module.exports.login = (req, res, next) => {
     })
     .catch((err) => {
       if (err) {
-        throw new UnauthorizedError('Неправильные почта или пароль');
+        next(new UnauthorizedError('Неправильные почта или пароль'));
       }
-      next(err);
-    })
-    .catch(next);
+      next();
+    });
+  // .catch(next);
 };
 
 module.exports.getUserCurrent = (req, res, next) => {

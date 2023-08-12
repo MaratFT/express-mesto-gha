@@ -27,8 +27,8 @@ module.exports.createCard = (req, res, next) => {
           ),
         );
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -55,8 +55,8 @@ module.exports.deleteCard = (req, res, next) => {
           ),
         );
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 module.exports.putCardLike = (req, res, next) => {
@@ -84,8 +84,8 @@ module.exports.putCardLike = (req, res, next) => {
           ),
         );
       }
-    })
-    .catch(next);
+      next();
+    });
 };
 
 module.exports.deleteCardLike = (req, res, next) => {
@@ -111,6 +111,6 @@ module.exports.deleteCardLike = (req, res, next) => {
           ),
         );
       }
-    })
-    .catch(next);
+      next();
+    });
 };
