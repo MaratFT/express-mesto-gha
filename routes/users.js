@@ -3,7 +3,7 @@ const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const auth = require('../middlewares/auth');
 
-const regex = /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/;
+const regex = require('../utils/regex');
 
 const {
   getUsers,
@@ -15,49 +15,6 @@ const {
   getUserCurrent,
   // getToken,
 } = require('../controllers/users');
-
-router.get(
-  '/users',
-  auth,
-  // (req, res) => res.append("Authorization", `Bearer ${getToken}`),
-  getUsers,
-);
-
-router.get('/users/me', auth, getUserCurrent);
-
-router.get(
-  '/users/:userId',
-  celebrate({
-    params: Joi.object().keys({
-      userId: Joi.string().length(24).hex().required(),
-    }),
-  }),
-  auth,
-  getUser,
-);
-
-router.patch(
-  '/users/me',
-  celebrate({
-    body: Joi.object().keys({
-      name: Joi.string().min(2).max(30),
-      about: Joi.string().min(2).max(30),
-    }),
-  }),
-  auth,
-  updateUser,
-);
-
-router.patch(
-  '/users/me/avatar',
-  celebrate({
-    body: Joi.object().keys({
-      avatar: Joi.string().pattern(new RegExp(regex)),
-    }),
-  }),
-  auth,
-  updateAvatar,
-);
 
 router.post(
   '/signin',
@@ -82,6 +39,50 @@ router.post(
     }),
   }),
   createUser,
+);
+
+router.use(auth);
+
+router.get(
+  '/users',
+  auth,
+  // (req, res) => res.append("Authorization", `Bearer ${getToken}`),
+  getUsers,
+);
+
+router.get('/users/me', getUserCurrent);
+
+router.get(
+  '/users/:userId',
+  celebrate({
+    params: Joi.object().keys({
+      userId: Joi.string().length(24).hex().required(),
+    }),
+  }),
+  getUser,
+);
+
+router.patch(
+  '/users/me',
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+    }),
+  }),
+
+  updateUser,
+);
+
+router.patch(
+  '/users/me/avatar',
+  celebrate({
+    body: Joi.object().keys({
+      avatar: Joi.string().pattern(new RegExp(regex)),
+    }),
+  }),
+
+  updateAvatar,
 );
 
 module.exports = router;

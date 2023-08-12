@@ -2,9 +2,9 @@ const router = require('express').Router();
 
 const { celebrate, Joi } = require('celebrate');
 
-// const auth = require("../middlewares/auth");
+const auth = require('../middlewares/auth');
 
-const regex = /^(https?:\/\/)?([\w-]{1,32}\.[\w-]{1,32})[^\s@]*$/;
+const regex = require('../utils/regex');
 
 const {
   getCards,
@@ -13,6 +13,8 @@ const {
   putCardLike,
   deleteCardLike,
 } = require('../controllers/cards');
+
+router.use(auth);
 
 router.get('/cards', getCards);
 

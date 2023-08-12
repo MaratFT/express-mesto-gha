@@ -1,16 +1,9 @@
 const Card = require('../models/card');
 
-// const ERROR_CODE = 400;
-// const NOT_FOUND_CODE = 404;
-// const SERVER_ERROR_CODE = 500;
-
 const CREATED_CODE = 201;
 
-// const BadRequestError = require("../errors/bad-request-error");
-// const ExistsDatabaseError = require('../errors/exists-database-error');
+const BadRequestError = require('../errors/bad-request-error');
 const NotFoundError = require('../errors/not-found-err');
-// const ServerError = require('../errors/server-error');
-// const UnauthorizedError = require('../errors/unauthorized-error');
 const ForbiddenError = require('../errors/forbidden-error');
 
 module.exports.getCards = (req, res, next) => {
@@ -26,6 +19,15 @@ module.exports.createCard = (req, res, next) => {
 
   Card.create({ name, link, owner: id })
     .then((card) => res.status(CREATED_CODE).send({ data: card }))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные при создании карточки',
+          ),
+        );
+      }
+    })
     .catch(next);
 };
 
@@ -42,7 +44,12 @@ module.exports.deleteCard = (req, res, next) => {
           `Карточка другого пользователя (${card.owner})`,
         );
       }
-      Card.findByIdAndRemove(card).then((cardDelete) => res.send(cardDelete));
+      Card.deleteOne(card).then((cardDelete) => res.send(cardDelete));
+    })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        next(new BadRequestError('Некорректный запрос карточки'));
+      }
     })
     .catch(next);
 };
@@ -61,6 +68,15 @@ module.exports.putCardLike = (req, res, next) => {
       }
       res.send({ data: card });
     })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные для постановки лайка',
+          ),
+        );
+      }
+    })
     .catch(next);
 };
 
@@ -78,9 +94,12 @@ module.exports.deleteCardLike = (req, res, next) => {
       }
       res.send({ data: card });
     })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        next(
+          new BadRequestError('Переданы некорректные данные для снятия лайка'),
+        );
+      }
+    })
     .catch(next);
 };
-
-// getCards, createCard, deleteCard
-
-// putCardLike, deleteCardLike

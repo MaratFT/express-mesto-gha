@@ -2,25 +2,13 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-// const ERROR_CODE = 400;
-// const NOT_FOUND_CODE = 404;
-// const SERVER_ERROR_CODE = 500;
-// const UNAUTHORIZED_ERROR_CODE = 401;
-
 const CREATED_CODE = 201;
 
 const NotFoundError = require('../errors/not-found-err');
 
-// // const BadRequestError = require('../errors/bad-request-error');
-// const ExistsDatabaseError = require('../errors/exists-database-error');
-
-// // const ServerError = require('../errors/server-error');
+const BadRequestError = require('../errors/bad-request-error');
+const ExistsDatabaseError = require('../errors/exists-database-error');
 const UnauthorizedError = require('../errors/unauthorized-error');
-
-// module.exports.getToken = (req, res) => {
-//   const { token } = req;
-//   return token;
-// };
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -40,44 +28,43 @@ module.exports.getUser = (req, res, next) => {
       }
       res.send(user);
     })
+    .catch((err) => {
+      if (err.kind === 'ObjectId') {
+        next(new BadRequestError('Некорректный запрос пользователя'));
+      }
+    })
     .catch(next);
 };
 
-module.exports.createUser = (req, res, next) => {
+module.exports.createUser = async (req, res, next) => {
   const {
     email, name, about, avatar,
   } = req.body;
 
-  bcrypt
-    .hash(req.body.password, 10)
-    .then((hash) => {
-      User.create({
-        name,
-        about,
-        avatar,
-        email,
-        password: hash,
-      })
-        .then((user) => res.status(CREATED_CODE).send({
-          name: user.name,
-          about: user.about,
-          avatar: user.avatar,
-          email: user.email,
-          _id: user._id,
-        }))
-        .catch((error) => {
-          if (error.code === 11000) {
-            res
-              .status(409)
-              .send({ message: 'Уже существует такой пользователь' });
-          } else {
-            next(error);
-          }
-        });
-    })
-    .catch((err) => {
-      next(err);
+  try {
+    const hash = await bcrypt.hash(req.body.password, 10);
+    const user = await User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
     });
+
+    res.status(CREATED_CODE).send({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+      _id: user._id,
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      next(new ExistsDatabaseError('Уже существует такой пользователь'));
+    } else {
+      next(error);
+    }
+  }
 };
 
 module.exports.updateUser = (req, res, next) => {
@@ -95,6 +82,15 @@ module.exports.updateUser = (req, res, next) => {
       //   );
       // }
       res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные при обновлении профиля',
+          ),
+        );
+      }
     })
     .catch(next);
 };
@@ -114,6 +110,15 @@ module.exports.updateAvatar = (req, res, next) => {
       //   );
       // }
       res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(
+          new BadRequestError(
+            'Переданы некорректные данные при обновлении аватара',
+          ),
+        );
+      }
     })
     .catch(next);
 };
