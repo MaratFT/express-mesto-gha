@@ -13,7 +13,6 @@ const {
   updateAvatar,
   login,
   getUserCurrent,
-  // getToken,
 } = require('../controllers/users');
 
 router.post(
@@ -43,12 +42,7 @@ router.post(
 
 router.use(auth);
 
-router.get(
-  '/users',
-  auth,
-  // (req, res) => res.append("Authorization", `Bearer ${getToken}`),
-  getUsers,
-);
+router.get('/users', getUsers);
 
 router.get('/users/me', getUserCurrent);
 
