@@ -1,6 +1,6 @@
 [![Tests](../../actions/workflows/tests-13-sprint.yml/badge.svg)](../../actions/workflows/tests-13-sprint.yml) [![Tests](../../actions/workflows/tests-14-sprint.yml/badge.svg)](../../actions/workflows/tests-14-sprint.yml)
 
-# Проект Mesto фронтенд + бэкенд
+# Проект Mesto бэкенд
 
 _Описание:_
 Back-end часть проекта Mesto. В проекте используется БЭМ в организации файлов, JavaScript, Node.js, Express.js, Eslint, MongoDB
