@@ -3,11 +3,7 @@
 # Проект Mesto бэкенд
 
 _Описание:_
-Back-end часть проекта Mesto. В проекте используется БЭМ в организации файлов, JavaScript, Node.js, Express.js, Eslint, MongoDB
-
-_Планы по доработке:_
-
-- Добавить аутентификацию и авторизацию
+Back-end часть проекта Mesto. В проекте используется JavaScript, Node.js, Express.js, Eslint, MongoDB
 
 ## Директории
 
@@ -19,7 +15,8 @@ _Планы по доработке:_
 
 ## Запуск проекта
 
-`npm run start` — запускает сервер  
-`npm run dev` — запускает сервер с hot-reload
+  1. Установить зависимости командой _npm i_
+  2. `npm run start` — запускает сервер  
+  3. `npm run dev` — запускает сервер с hot-reload
 
 _Ссылка на репозиторий_: https://github.com/MaratFT/express-mesto-gha.git
